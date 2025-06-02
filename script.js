@@ -1,74 +1,131 @@
-$(document).ready(function(){
-    $(window).scroll(function(){
-        // sticky navbar on scroll script
-        if(this.scrollY > 20){
-            $('.navbar').addClass("sticky");
-        }else{
-            $('.navbar').removeClass("sticky");
-        }
+// DOM Elements
+const navLinks = document.querySelectorAll('header nav a');
+const sections = document.querySelectorAll('section');
+const aboutBtns = document.querySelectorAll('.about-btn');
+const arrowRight = document.querySelector('.portfolio-box .navigation .arrow-right');
+const arrowLeft = document.querySelector('.portfolio-box .navigation .arrow-left');
+const menuIcon = document.getElementById('menu-icon');
+const navbar = document.querySelector('header nav');
+const form = document.querySelector('form');
+
+// Variables
+let currentSection = '';
+let portfolioIndex = 0;
+
+// Initialize active states
+function initializeActiveStates() {
+    // Set home as active by default
+    document.getElementById('home').classList.add('active');
+    
+    // Set first nav link as active
+    navLinks[0].classList.add('active');
+    
+    // Set first about button and detail as active
+    aboutBtns[0].classList.add('active');
+    document.querySelector('.about-detail').classList.add('active');
+    
+    // Set first portfolio item as active
+    activePortfolio();
+}
+
+// Navigation active state
+function updateActivePage() {
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
         
-        // scroll-up button show/hide script
-        if(this.scrollY > 500){
-            $('.scroll-up-btn').addClass("show");
-        }else{
-            $('.scroll-up-btn').removeClass("show");
+        if (window.scrollY >= (sectionTop - 300) && 
+            window.scrollY < (sectionTop + sectionHeight - 300)) {
+            currentSection = section.id;
         }
     });
 
-    // slide-up script
-    $('.scroll-up-btn').click(function(){
-        $('html').animate({scrollTop: 0});
-        // removing smooth scroll on slide-up button click
-        $('html').css("scrollBehavior", "auto");
-    });
-
-    $('.navbar .menu li a').click(function(){
-        // applying again smooth scroll on menu items click
-        $('html').css("scrollBehavior", "smooth");
-    });
-
-    // toggle menu/navbar script
-    $('.menu-btn').click(function(){
-        $('.navbar .menu').toggleClass("active");
-        $('.menu-btn i').toggleClass("active");
-    });
-
-    // typing text animation script
-    var typed = new Typed(".typing", {
-        strings: ["Software Developer", "Graphic Desiger", "App Developer"],
-        typeSpeed: 100,
-        backSpeed: 60,
-        loop: true
-    });
-
-    var typed = new Typed(".typing-2", {
-        strings: ["Software Developer", "Graphic Desiger", "App Developer"],
-        typeSpeed: 100,
-        backSpeed: 60,
-        loop: true
-    });
-
-    // owl carousel script
-    $('.carousel').owlCarousel({
-        margin: 20,
-        loop: true,
-        autoplay: true,
-        autoplayTimeOut: 2000,
-        autoplayHoverPause: true,
-        responsive: {
-            0:{
-                items: 1,
-                nav: false
-            },
-            600:{
-                items: 2,
-                nav: false
-            },
-            1000:{
-                items: 3,
-                nav: false
-            }
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${currentSection}`) {
+            link.classList.add('active');
         }
     });
+}
+
+// About section tabs
+function setupAboutTabs() {
+    aboutBtns.forEach((btn, idx) => {
+        btn.addEventListener('click', () => {
+            const aboutDetails = document.querySelectorAll('.about-detail');
+
+            aboutBtns.forEach(btn => btn.classList.remove('active'));
+            aboutDetails.forEach(detail => detail.classList.remove('active'));
+
+            btn.classList.add('active');
+            aboutDetails[idx].classList.add('active');
+        });
+    });
+}
+
+// Portfolio carousel
+function activePortfolio() {
+    const imgSlide = document.querySelector('.portfolio-carousel .img-slide');
+    const portfolioDetails = document.querySelectorAll('.portfolio-detail');
+
+    imgSlide.style.transform = `translateX(calc(${portfolioIndex * -100}% - ${portfolioIndex * 2}rem))`;
+
+    portfolioDetails.forEach(detail => detail.classList.remove('active'));
+    portfolioDetails[portfolioIndex].classList.add('active');
+
+    // Update button states
+    arrowLeft.classList.toggle('disabled', portfolioIndex === 0);
+    arrowRight.classList.toggle('disabled', portfolioIndex === portfolioDetails.length - 1);
+}
+
+function setupPortfolioNavigation() {
+    arrowRight.addEventListener('click', () => {
+        const portfolioDetails = document.querySelectorAll('.portfolio-detail');
+        if (portfolioIndex < portfolioDetails.length - 1) {
+            portfolioIndex++;
+            activePortfolio();
+        }
+    });
+
+    arrowLeft.addEventListener('click', () => {
+        if (portfolioIndex > 0) {
+            portfolioIndex--;
+            activePortfolio();
+        }
+    });
+}
+
+// Mobile menu
+function setupMobileMenu() {
+    menuIcon.addEventListener('click', () => {
+        navbar.classList.toggle('active');
+        menuIcon.classList.toggle('fa-xmark');
+    });
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            navbar.classList.remove('active');
+            menuIcon.classList.remove('fa-xmark');
+        });
+    });
+}
+
+// Form submission
+function setupForm() {
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        // Add form submission logic here
+        alert('Form submitted successfully!');
+        form.reset();
+    });
+}
+
+// Event Listeners
+window.addEventListener('scroll', updateActivePage);
+window.addEventListener('DOMContentLoaded', () => {
+    initializeActiveStates();
+    setupAboutTabs();
+    setupPortfolioNavigation();
+    setupMobileMenu();
+    setupForm();
 });
-
